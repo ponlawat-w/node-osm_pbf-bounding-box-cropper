@@ -1,0 +1,18 @@
+{
+  "name": "osm_pbf-bounding-box-cropper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node ./index.js -s eiei"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "pbf": "^3.2.0",
+    "pbs": "^1.3.2",
+    "protobufjs": "^6.8.8",
+    "readline-sync": "^1.4.9"
+  }
+}
