@@ -5,6 +5,7 @@ const nodeFilterFunctionGenerator = require('./filters/node');
 const filterWay = require('./filters/way');
 const filterRelation = require('./filters/relation');
 const process = require('process');
+const osmPbfToGeoJson = require('./osm-pbf-to-geojson');
 
 module.exports = input => {
   const reader = new OsmPbfReader(input.sourcePath);
@@ -55,22 +56,28 @@ module.exports = input => {
   filteredGeos[GeoType.way] = [];
   filteredGeos[GeoType.relation] = [];
 
+  const allRelations = [];
+
   let nodeSorted = false;
   let waySorted = false;
 
-  const checkNodeAndSort = () => {
+  const checkNodesAndSort = () => {
     if (!nodeSorted) {
       print('Sorting nodes...');
       filteredGeos[GeoType.node] = filteredGeos[GeoType.node].sort();
       nodeSorted = true;
     }
   };
-  const checkWayAndSort = () => {
+  const checkWaysAndSort = () => {
     if (!waySorted) {
       print('Sorting ways...');
       filteredGeos[GeoType.way] = filteredGeos[GeoType.way].sort((w1, w2) => w1.id - w2.id);
       waySorted = true;
     }
+  };
+  const sortRelations = () => {
+    print('Sorting relations...');
+    filteredGeos[GeoType.relation] = filteredGeos[GeoType.relation].sort((r1, r2) => r1.id - r2.id);
   };
 
   reader.events.on('nodes', nodes => {
@@ -81,7 +88,7 @@ module.exports = input => {
     nodeSorted = false;
   });
   reader.events.on('ways', ways => {
-    checkNodeAndSort();
+    checkNodesAndSort();
     ways.filter(way => filterWay(way, filteredGeos)).forEach(way => {
       filteredGeos[GeoType.way].push(parseInt(way.id));
       writer.addGeo(way);
@@ -89,21 +96,31 @@ module.exports = input => {
     waySorted = false;
   });
   reader.events.on('relations', relations => {
-    checkNodeAndSort();
-    checkWayAndSort();
+    checkNodesAndSort();
+    checkWaysAndSort();
     relations.forEach(relation => {
-      if (filterRelation(relation, filteredGeos)) {
-        filteredGeos[GeoType.relation].push(parseInt(relation.id));
-        writer.addGeo(relation);
-      }
+      allRelations.push(relation);
+      filteredGeos[GeoType.relation].push(parseInt(relation.id));
     });
   });
 
   reader.events.on('finish', () => {
+    sortRelations();
+    allRelations.forEach(relation => {
+      if (filterRelation(relation, filteredGeos)) {
+        writer.addGeo(relation);
+      }
+    });
+    
     writer.finish();
   });
   writer.events.on('finish', () => {
     console.log('\nFinished!');
+
+    console.log('Writing target in json format...');
+    osmPbfToGeoJson(input.targetPath, input.targetGeoJson).then(() => {
+      console.log('Finished!');
+    });
   });
 
   reader.events.on('chunk', chunk => {

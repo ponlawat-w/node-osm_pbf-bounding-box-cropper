@@ -93,3 +93,5 @@ typings/
 *.osm.pbf
 data/
 out/
+
+*.ps1
