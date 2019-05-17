@@ -17,6 +17,7 @@ class OsmPbfStreamReader {
     this.bufferPointer = 0;
 
     this.streamFinished = false;
+    this.withInfos = true;
 
     const stats = fs.statSync(sourcePath);
     this.size = parseInt(stats['size']);
@@ -102,7 +103,7 @@ class OsmPbfStreamReader {
       this._clearProcessedBuffer();
 
       this.events.emit('fileBlock', blob, blobHeader, blobHeaderLength);
-      osmPbfBlobDecode(blob, blobHeader, this.events);
+      osmPbfBlobDecode(blob, blobHeader, this.events, this.withInfos);
     }
 
     this.properlyEmitFinishEvent();

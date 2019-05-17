@@ -32,14 +32,12 @@ const wayToFeature = way => ({
     stroke: '#555555',
     'stroke-width': 1,
     'stroke-opacity': 1,
-    ...way.tags
+    ...(way.tags ? way.tags : {})
   },
   geometry: {
     type: 'LineString',
     coordinates: way.refs.map(ref => {
       if (!nodesDictById[ref]) {
-        console.log(ref);
-        console.log(nodesDictById);
         return null;
       }
       return [
@@ -47,10 +45,6 @@ const wayToFeature = way => ({
         nodesDictById[ref].lat
       ];
     }).filter(n => n)
-    // coordinates: way.refs.map(ref => [
-    //   nodesDictById[ref].lng,
-    //   nodesDictById[ref].lat
-    // ])
   }
 });
 
@@ -58,10 +52,13 @@ const relationToFeatureCollection = relation => ({
   type: 'FeatureCollection',
   properties: relation.tags,
   features: relation.members.map(member => {
-    if (member.type === GeoType.node) {
+    if (member.type === GeoType.node && nodesDictById[member.id]) {
       return nodeToFeature(nodesDictById[member.id]);
-    } else if (member.type === GeoType.way) {
-      return wayToFeature(waysDictById[member.id]);
+    } else if (member.type === GeoType.way && waysDictById[member.id]) {
+      const feature = wayToFeature(waysDictById[member.id]); 
+      if (feature.geometry.coordinates.length > 1) {
+        return feature;
+      }
     } else if (member.type === GeoType.relation && relationsDictById[member.id]) {
       return relationToFeatureCollection(relationsDictById[member.id]);
     }
@@ -110,7 +107,8 @@ module.exports = (osmPbfPath, geoJsonPath) => {
   reader.events.on('relations', relations => {
     if (!waysWritten) {
       process.stdout.write('Writing ways...');
-      writeFeatures(waysFeatures, `${geoJsonPath}/ways.json`);
+      writeFeatures(waysFeatures.filter(f => f.geometry.coordinates.length > 1),
+        `${geoJsonPath}/ways.json`);
       console.log('OK');
     }
 

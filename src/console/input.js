@@ -16,7 +16,7 @@ module.exports = () => {
   return {
     sourcePath: args.getOrReadline(['-s', '--source'], 'Source Path: '),
     targetPath: args.getOrReadline(['-t', '--target'], 'Target Path: '),
-    targetGeoJson: args.getOrReadline(['-g', '--geojson'], 'Target GeoJson: '),
+    // targetGeoJson: args.getOrReadline(['-g', '--geojson'], 'Target GeoJson: '),
     northwest: {
       lat: northwest[0],
       lng: northwest[1]

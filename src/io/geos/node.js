@@ -1,9 +1,9 @@
 const type = require('./../osm-object-type').node;
 
 module.exports = (id, lat, lng, data = {}) => ({
-  id: id,
-  lat: lat,
-  lng: lng,
-  type: type,
+  id: parseInt(id),
+  lat: parseFloat(lat),
+  lng: parseFloat(lng),
+  type: parseInt(type),
   ...data
 });

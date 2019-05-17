@@ -10,8 +10,8 @@ module.exports = (pbfWays, settings) => pbfWays.map(pbfWay => {
     refs.push(ref);
   }
 
-  return createWay(pbfWay.id, refs, {
+  return createWay(pbfWay.id, refs, settings.withInfos ? {
     ...decodePbfInfo(pbfWay.info, settings),
     tags: decodePbfTags(pbfWay, settings)
-  });
+  } : {});
 });

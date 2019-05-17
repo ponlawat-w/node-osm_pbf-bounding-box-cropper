@@ -1,8 +1,8 @@
 const type = require('./../osm-object-type').way;
 
 module.exports = (id, refs, data = {}) => ({
-  id: id,
-  refs: refs,
-  type: type,
+  id: parseInt(id),
+  refs: refs.map(ref => parseInt(ref)),
+  type: parseInt(type),
   ...data
 });

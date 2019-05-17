@@ -11,7 +11,7 @@ const messages = {
   primitiveBlock: root.lookupType('PrimitiveBlock')
 };
 
-module.exports = (blob, blobHeader, parentEvents) => {
+module.exports = (blob, blobHeader, parentEvents, withInfos = true) => {
   let rawBlob;
   if (blob.raw && blob.raw.length) {
     rawBlob = blob.raw;

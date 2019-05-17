@@ -14,8 +14,8 @@ module.exports = (pbfRelations, settings) => pbfRelations.map(pbfRelation => {
     });
   }
 
-  return createRelation(pbfRelation.id, members, {
+  return createRelation(pbfRelation.id, members, settings.withInfos ? {
     ...decodePbfInfo(pbfRelation.info, settings),
     tags: decodePbfTags(pbfRelation, settings)
-  });
+  } : {});
 });
